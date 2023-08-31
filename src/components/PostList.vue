@@ -2,7 +2,6 @@
   <a-list item-layout="horizontal" :data-source="props.postList">
     <template #renderItem="{ item }">
       <a-list-item>
-        <!--内容-->
         <a-list-item-meta
             :description=item.content
         >
@@ -21,7 +20,7 @@
 </template>
 
 <script setup lang="ts">
-import { withDefaults, defineProps } from "vue";
+import {withDefaults, defineProps} from "vue";
 
 interface Props {
   postList: any[];
