@@ -11,15 +11,15 @@
 
     <!--标签页-->
     <a-tabs v-model:activeKey="activeKey" @change="onTabChange">
-      <a-tab-pane key="文章" tab="文章">
+      <a-tab-pane key="post" tab="文章">
         <PostList :post-list="postList"/>
       </a-tab-pane>
 
-      <a-tab-pane key="图片" tab="图片">
+      <a-tab-pane key="picture" tab="图片">
         <PictureList :picture-list="pictureList"/>
       </a-tab-pane>
 
-      <a-tab-pane key="用户" tab="用户">
+      <a-tab-pane key="user" tab="用户">
         <UserList :user-list="userList"/>
       </a-tab-pane>
     </a-tabs>
@@ -33,6 +33,7 @@ import PostList from "@/components/PostList.vue"
 import {useRoute, useRouter} from "vue-router";
 import PictureList from "@/components/PictureList.vue";
 import UserList from "@/components/UserList.vue";
+import {message} from "ant-design-vue";
 
 // 文章列表
 const postList = ref([]);
@@ -87,15 +88,24 @@ const loadDataOld = (params: any) => {
 }
 
 const loadData = (params: any) => {
+  const {type = "post"} = params;
+  if (!type) {
+    message.error("类别为空");
+    return;
+  }
   const query = {
     ...params,
-    searchText: params.text
-  }
-// 聚合搜索
-  myAxios.post("search/list/page/vo", query).then((res: any) => {
-    postList.value = res.postList;
-    userList.value = res.userList;
-    pictureList.value = res.pictureList;
+    searchText: params.text,
+  };
+
+  myAxios.post("search/all", query).then((res: any) => {
+    if (type === "post") {
+      postList.value = res.dataList;
+    } else if (type === "user") {
+      userList.value = res.dataList;
+    } else if (type === "picture") {
+      pictureList.value = res.dataList;
+    }
   });
 }
 
