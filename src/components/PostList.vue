@@ -3,15 +3,17 @@
     <template #renderItem="{ item }">
       <a-list-item>
         <a-list-item-meta
-            :description=item.content
         >
           <!--标题-->
           <template #title>
-            <a href="https://www.antdv.com/">{{ item.title }}</a>
+            <a href="https://www.antdv.com/" v-html="item.title"></a>
           </template>
           <!--头像-->
           <template #avatar>
             <a-avatar src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"/>
+          </template>
+          <template #description>
+            <div v-html="item.content" style="margin-bottom: 10px"></div>
           </template>
         </a-list-item-meta>
       </a-list-item>

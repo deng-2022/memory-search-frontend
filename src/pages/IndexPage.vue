@@ -11,8 +11,12 @@
 
     <!--标签页-->
     <a-tabs v-model:activeKey="activeKey" @change="onTabChange">
-      <a-tab-pane key="post" tab="文章">
+      <a-tab-pane key="post" tab="诗词">
         <PostList :post-list="postList"/>
+      </a-tab-pane>
+
+      <a-tab-pane key="article" tab="博文">
+        <ArticleList :article-list="articleList"/>
       </a-tab-pane>
 
       <a-tab-pane key="picture" tab="图片">
@@ -27,9 +31,10 @@
 </template>
 
 <script lang="ts" setup>
-import {ref, watchEffect} from 'vue';
+import {ref, watchEffect} from "vue";
 import myAxios from "@/plugins/myAxios";
-import PostList from "@/components/PostList.vue"
+import PostList from "@/components/PostList.vue";
+import ArticleList from "@/components/ArticleList.vue";
 import {useRoute, useRouter} from "vue-router";
 import PictureList from "@/components/PictureList.vue";
 import UserList from "@/components/UserList.vue";
@@ -37,6 +42,7 @@ import {message} from "ant-design-vue";
 
 // 文章列表
 const postList = ref([]);
+const articleList = ref([]);
 const userList = ref([]);
 const pictureList = ref([]);
 
@@ -53,8 +59,7 @@ const initSearchParams = {
   pageNum: 1,
 };
 
-const searchParams = ref(initSearchParams)
-
+const searchParams = ref(initSearchParams);
 
 /**
  * 加载数据
@@ -64,28 +69,28 @@ const searchParams = ref(initSearchParams)
 const loadDataOld = (params: any) => {
   const postQuery = {
     ...params,
-    searchText: params.text
-  }
+    searchText: params.text,
+  };
   myAxios.post("post/list/page/vo", postQuery).then((res: any) => {
     postList.value = res.records;
   });
 
   const userQuery = {
     ...params,
-    userName: params.text
-  }
+    userName: params.text,
+  };
   myAxios.post("user/list/page/vo", userQuery).then((res: any) => {
     userList.value = res.records;
   });
 
   const pictureQuery = {
     ...params,
-    searchText: params.text
-  }
+    searchText: params.text,
+  };
   myAxios.post("picture/list/page/vo", pictureQuery).then((res: any) => {
     pictureList.value = res.records;
   });
-}
+};
 
 const loadData = (params: any) => {
   const {type = "post"} = params;
@@ -98,17 +103,28 @@ const loadData = (params: any) => {
     searchText: params.text,
   };
 
-  myAxios.post("search/all", query).then((res: any) => {
+  myAxios.post("/search/all", query).then((res: any) => {
     if (type === "post") {
       postList.value = res.dataList;
     } else if (type === "user") {
       userList.value = res.dataList;
     } else if (type === "picture") {
       pictureList.value = res.dataList;
+    } else if (type === "article") {
+      if (res.data !== null) {
+        articleList.value = res.dataList.map((article: any) => {
+          return {
+            ...article,
+            isLiked: false,
+            isCollected: false,
+            isComment: false
+          };
+        });
+      }
+      articleList.value = res.dataList;
     }
   });
-}
-
+};
 
 // 执行搜索
 const onSearch = (value: any) => {
@@ -117,16 +133,16 @@ const onSearch = (value: any) => {
       ...searchParams.value,
       text: value,
     },
-  })
-  loadData(searchParams.value)
-}
+  });
+  loadData(searchParams.value);
+};
 
 const onTabChange = (key: any) => {
   router.push({
     path: key,
-    query: searchParams.value
-  })
-}
+    query: searchParams.value,
+  });
+};
 
 watchEffect(() => {
   searchParams.value = {
@@ -135,6 +151,5 @@ watchEffect(() => {
     type: route.params.category,
   } as any;
   loadData(searchParams.value);
-})
+});
 </script>
-
