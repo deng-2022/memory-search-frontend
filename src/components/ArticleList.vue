@@ -13,34 +13,14 @@
               <!--博文-->
               <a-card hoverable>
                 <!--操作-->
-                <template #actions>
-                  <LikeTwoTone style="font-size: 18px" key="like"
-                               :twoToneColor="item.isLiked ? '#ff4d4f' : '#b0c4d8'"
-                               @click="toggleLike(item)"/>
 
-                  <HeartTwoTone style="font-size: 18px" key="collect"
-                                :twoToneColor="item.isCollected ? '#ff4d4f' : '#b0c4d8'"
-                                @click="toggleCollect(item)"
-                  />
-                  <MessageTwoTone @click="goToRead(item.id)" style="font-size: 18px" key="comment"
-                                  :twoToneColor="item.isComment ? '#ff4d4f' : '#b0c4d8'"
-                  />
-                </template>
-                <div style="position: absolute;left: 195px;top:297px;display: flex">
-                  <div style="margin-right: 335px">
-                    {{ item.likes }}
-                  </div>
-                  <div style="margin-right: 335px">
-                    {{ item.collects }}
-                  </div>
-                  <div>
-                    {{ item.comments }}
-                  </div>
-                </div>
 
                 <div @click="goToRead(item.id)">
                   <!--标题-->
-                  <a-card-meta :title="item.title">
+                  <a-card-meta>
+                    <template #title>
+                      <div v-html="item.title"></div>
+                    </template>
                     <!--文章信息-->
 
                     <template #description>
@@ -56,8 +36,7 @@
                   <div style="position: relative">
                     <!--文章简介-->
                     <div style="position: absolute;width: 60%;margin-top: 20px">
-                      {{ item.description }} {{ item.description }} {{ item.description }} {{ item.description }}
-                      {{ item.description }} {{ item.description }}
+                      <div v-html="item.description"></div>
                     </div>
                     <!--作者信息-->
                     <!--                  <a-avatar style="position: absolute; top: 150px;left: 25px" size="large"-->
@@ -65,15 +44,15 @@
                     <!--                  <div style="position: absolute;top: 160px;left: 80px;">-->
                     <!--                    <a-tag color="green"> {{ item.author.username }}</a-tag>-->
                     <!--                  </div>-->
-                    <div style="position: absolute;top: 160px;left: 300px">
-                      <a-tag color="orange">orange</a-tag>
-                      <a-tag color="green">green</a-tag>
-                      <a-tag color="cyan">cyan</a-tag>
-                      <a-tag color="blue">blue</a-tag>
+                    <div style="position: absolute;top: 180px;left: 650px">
+                      <a-tag color="orange" class="size">orange</a-tag>
+                      <a-tag color="green" class="size">green</a-tag>
+                      <a-tag color="cyan" class="size">cyan</a-tag>
+                      <a-tag color="blue" class="size">blue</a-tag>
                     </div>
                     <!--文章配图-->
                     <div style="margin-left: 65%">
-                      <img style="width: 300px" :src="item.articleUrl">
+                      <img style="width: 350px" :src="item.articleUrl">
                     </div>
                   </div>
                 </div>
@@ -93,6 +72,7 @@
       >
         <template #renderItem="{ item }">
           <a-list-item>
+
             <!--文章操作-->
             <template #actions>
               <a @click="goToRead(item.id)">查看</a>
@@ -101,7 +81,7 @@
 
             <a-list-item-meta>
               <template #title>
-<!--                <a @click="goToRead(item.id)">{{ item.title }}</a>-->
+                <!--                <a @click="goToRead(item.id)">{{ item.title }}</a>-->
                 <div v-html="item.title"></div>
               </template>
 
@@ -111,12 +91,18 @@
             </a-list-item-meta>
 
             <!--文章标签-->
-            <div style="position: absolute;left: 520px; ">
+            <!--            <div v-for="(tag,index) in item.tags" :key="index" style="position: absolute;left: 700px;">-->
+            <!--              <a-tag color="orange">{{ tag }}</a-tag>-->
+            <!--            </div>-->
+
+            <div style="position: absolute;left: 700px;">
               <a-tag color="orange">orange</a-tag>
               <a-tag color="green">green</a-tag>
               <a-tag color="cyan">cyan</a-tag>
               <a-tag color="blue">blue</a-tag>
+
             </div>
+
 
             <div style="position:absolute; margin-left: 70%">
               <!--文章配图-->
@@ -137,18 +123,28 @@
 <script setup lang="ts">
 import {withDefaults, defineProps, ref} from "vue";
 import {
-  MessageTwoTone,
-  HeartTwoTone,
-  LikeTwoTone,
   ClockCircleTwoTone,
   EyeTwoTone,
 } from '@ant-design/icons-vue';
+import router from "@/router";
 
 // 执行聚合搜素
 const doSearchArticle = ref(false);
 
 const doSearchTest = () => {
   doSearchArticle.value = !doSearchArticle.value
+}
+
+// 跳转博文详情页
+const goToRead = (id: never) => {
+  // router.push(`/blog/read/${id}`)
+  router.push({
+    name: "blogRead",
+    path: "/blog/read",
+    query: {
+      articleId: id
+    }
+  })
 }
 
 interface Props {
@@ -165,6 +161,14 @@ const props = withDefaults(defineProps<Props>(), {
   width: 100%;
   margin-bottom: 30px;
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+}
+
+.like {
+  width: 100%;
+}
+
+.size {
+  font-size: 16px
 }
 </style>
 

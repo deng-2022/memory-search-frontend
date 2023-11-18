@@ -23,9 +23,9 @@
         <PictureList :picture-list="pictureList"/>
       </a-tab-pane>
 
-      <a-tab-pane key="user" tab="用户">
-        <UserList :user-list="userList"/>
-      </a-tab-pane>
+      <!--      <a-tab-pane key="video" tab="视频">-->
+      <!--        <UserList :user-list="videoList"/>-->
+      <!--      </a-tab-pane>-->
     </a-tabs>
   </div>
 </template>
@@ -37,13 +37,13 @@ import PostList from "@/components/PostList.vue";
 import ArticleList from "@/components/ArticleList.vue";
 import {useRoute, useRouter} from "vue-router";
 import PictureList from "@/components/PictureList.vue";
-import UserList from "@/components/UserList.vue";
 import {message} from "ant-design-vue";
+
 
 // 文章列表
 const postList = ref([]);
 const articleList = ref([]);
-const userList = ref([]);
+// const videoList = ref([]);
 const pictureList = ref([]);
 
 const router = useRouter();
@@ -55,7 +55,7 @@ const searchText = ref(route.query.text || "");
 const initSearchParams = {
   type: activeKey,
   text: "",
-  pageSize: 15,
+  pageSize: 30,
   pageNum: 1,
 };
 
@@ -73,14 +73,6 @@ const loadDataOld = (params: any) => {
   };
   myAxios.post("post/list/page/vo", postQuery).then((res: any) => {
     postList.value = res.records;
-  });
-
-  const userQuery = {
-    ...params,
-    userName: params.text,
-  };
-  myAxios.post("user/list/page/vo", userQuery).then((res: any) => {
-    userList.value = res.records;
   });
 
   const pictureQuery = {
@@ -106,25 +98,20 @@ const loadData = (params: any) => {
   myAxios.post("/search/all", query).then((res: any) => {
     if (type === "post") {
       postList.value = res.dataList;
-    } else if (type === "user") {
-      userList.value = res.dataList;
     } else if (type === "picture") {
-      pictureList.value = res.dataList;
-    } else if (type === "article") {
-      if (res.data !== null) {
-        articleList.value = res.dataList.map((article: any) => {
+      if (res.dataList !== null) {
+        pictureList.value = res.dataList.map((picture: any) => {
           return {
-            ...article,
-            isLiked: false,
-            isCollected: false,
-            isComment: false
+            ...picture,
+            isVisitable: false
           };
         });
       }
+    } else if (type === "article") {
       articleList.value = res.dataList;
     }
-  });
-};
+  })
+}
 
 // 执行搜索
 const onSearch = (value: any) => {
@@ -134,9 +121,29 @@ const onSearch = (value: any) => {
       text: value,
     },
   });
+
   loadData(searchParams.value);
+  const type = route.params.category;
+
+  if (type === "post") {
+    message.success("成功检索出您感兴趣的诗词~")
+  } else if (type === "user") {
+    message.success("成功检索出您感兴趣的用户~")
+  } else if (type === "picture") {
+    pictureList.value = [];
+    getImages()
+  } else if (type === "article") {
+    message.success("成功检索出您感兴趣的博文~")
+  }
 };
 
+// 花费时间的执行反馈
+const getImages = () => {
+  const hide = message.loading('图片正在加载中，需要一点时间~', 0);
+  setTimeout(hide, 4000);
+};
+
+// 切换Tab页
 const onTabChange = (key: any) => {
   router.push({
     path: key,
