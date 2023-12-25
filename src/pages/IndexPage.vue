@@ -1,13 +1,17 @@
 <template>
   <div class="hello">
-    <!--搜索框-->
-    <a-input-search
-        v-model:value="searchText"
-        placeholder="请输入搜索关键词"
-        enter-button="搜索"
-        size="large"
-        @search="onSearch"
-    />
+    <div style="width: 200%">
+      <a-auto-complete
+          v-model:value="searchText"
+          :options="options"
+          style="width: 200px"
+          placeholder="请输入搜索关键词"
+          @select="onSelect"
+          @search="onSearchSuggest"
+      />
+
+      <a-button type="primary" @click="onSearch(searchText)">搜索框</a-button>
+    </div>
 
     <!--标签页-->
     <a-tabs v-model:activeKey="activeKey" @change="onTabChange">
@@ -31,13 +35,14 @@
 </template>
 
 <script lang="ts" setup>
-import {ref, watchEffect} from "vue";
+import {watchEffect} from "vue";
 import myAxios from "@/plugins/myAxios";
 import PostList from "@/components/PostList.vue";
 import ArticleList from "@/components/ArticleList.vue";
 import {useRoute, useRouter} from "vue-router";
 import PictureList from "@/components/PictureList.vue";
 import {message} from "ant-design-vue";
+import {ref} from 'vue';
 
 
 // 文章列表
@@ -85,19 +90,24 @@ const loadDataOld = (params: any) => {
 };
 
 const loadData = (params: any) => {
+  console.log("params = " + params)
   const {type = "post"} = params;
   if (!type) {
     message.error("类别为空");
     return;
   }
+
   const query = {
     ...params,
+    // searchText: params.text,
     searchText: params.text,
   };
 
   myAxios.post("/search/all", query).then((res: any) => {
+    // 搜索到诗词记录
     if (type === "post") {
       postList.value = res.dataList;
+      // 搜索到图片记录
     } else if (type === "picture") {
       if (res.dataList !== null) {
         pictureList.value = res.dataList.map((picture: any) => {
@@ -107,18 +117,56 @@ const loadData = (params: any) => {
           };
         });
       }
+      // 搜索到博文记录
     } else if (type === "article") {
       articleList.value = res.dataList;
     }
   })
 }
 
+// 搜索建议
+interface Suggest {
+  value: string;
+}
+
+// 请求获得建议词
+const getSuggest = (): Suggest => {
+  return {
+    value: "好好好",
+  };
+};
+
+// 建议列表
+const options = ref<Suggest[]>([]);
+
+// 从建议列表中选择一项
+const onSelect = (value: string) => {
+  console.log('onSelect', value);
+};
+
+
+// 搜索建议词
+const onSearchSuggest = (suggestText: string) => {
+  myAxios.get("/search/suggest", {
+    params: {
+      suggestText: suggestText,
+    }
+  }).then((res: any) => {
+    console.log("res = " + res)
+  })
+
+  options.value = !suggestText
+      ? []
+      : [getSuggest(), getSuggest(), getSuggest()];
+};
+
 // 执行搜索
-const onSearch = (value: any) => {
+const onSearch = (searchText: string) => {
+  console.log(searchText)
   router.push({
     query: {
       ...searchParams.value,
-      text: value,
+      text: searchText,
     },
   });
 

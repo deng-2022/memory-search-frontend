@@ -30,7 +30,6 @@
         @showSizeChange="onShowSizeChange"
     />
   </div>
-
 </template>
 
 <script setup lang="ts">
@@ -43,9 +42,11 @@ const current = ref(3);
 const onShowSizeChange = (current: number, pageSize: number) => {
   console.log(current, pageSize);
 };
+
 watch(pageSize, () => {
   console.log('pageSize', pageSize.value);
 });
+
 watch(current, () => {
   console.log('current', current.value);
 });

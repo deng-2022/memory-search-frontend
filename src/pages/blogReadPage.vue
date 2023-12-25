@@ -125,7 +125,7 @@ const getArticle = () => {
     articleInfo.value = res;
 
     const md = new MarkdownIt();
-    parsedContent.value = md.render(articleInfo.value.content);
+    parsedContent.value = md.render(articleInfo.value.title);
   }).catch(() => {
     console.log("获取文章信息失败")
   });
