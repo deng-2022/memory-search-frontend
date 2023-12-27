@@ -1,21 +1,23 @@
 <template>
-  <div>
+  <div class="post">
     <a-list item-layout="horizontal" :data-source="props.postList">
       <template #renderItem="{ item }">
         <a-list-item>
-          <a-list-item-meta
-          >
-            <!--标题-->
-            <template #title>
-              <a href="https://www.antdv.com/" v-html="item.title"></a>
-            </template>
-            <!--头像-->
-            <template #description>
-              <div v-html="item.author" style="margin-bottom: 10px"></div>
-            </template>
-          </a-list-item-meta>
+
+          <a-card hoverable style="width: 240px">
+            <a-list-item-meta>
+              <!--标题-->
+              <template #title>
+                <div v-html="item.title"></div>
+              </template>
+              <!--头像-->
+              <template #description>
+                <div v-html="item.author" style="margin-bottom: 10px"></div>
+              </template>
+            </a-list-item-meta>
+            <span v-html="item.content" style="width: 100%"></span>
+          </a-card>
         </a-list-item>
-        <span v-html="item.content" style="width: 100%"></span>
 
       </template>
     </a-list>
@@ -59,4 +61,10 @@ const props = withDefaults(defineProps<Props>(), {
   postList: () => [],
 });
 </script>
+
+<style>
+.post {
+  background-color: #E1E0C7;
+}
+</style>
 

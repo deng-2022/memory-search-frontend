@@ -1,36 +1,44 @@
 <template>
   <div class="hello">
-    <div style="width: 200%">
-      <a-auto-complete
-          v-model:value="searchText"
-          :options="options"
-          style="width: 200px"
-          placeholder="请输入搜索关键词"
-          @select="onSelect"
-          @search="onSearchSuggest"
-      />
+    <div style="margin: 0 20px">
+      <a-card >
+        <div>
+          <a-auto-complete
+              v-model:value="searchText"
+              :options="options"
+              style="width: 200px"
+              placeholder="请输入搜索关键词"
+              @select="onSelect"
+              @search="onSearchSuggest"
+          />
 
-      <a-button type="primary" @click="onSearch(searchText)">搜索框</a-button>
+          <a-button type="primary" @click="onSearch(searchText)">搜索框</a-button>
+        </div>
+      </a-card>
     </div>
 
-    <!--标签页-->
-    <a-tabs v-model:activeKey="activeKey" @change="onTabChange">
-      <a-tab-pane key="post" tab="诗词">
-        <PostList :post-list="postList"/>
-      </a-tab-pane>
 
-      <a-tab-pane key="article" tab="博文">
-        <ArticleList :article-list="articleList"/>
-      </a-tab-pane>
+    <a-card style="margin: 30px 20px">
+      <!--标签页-->
+      <a-tabs v-model:activeKey="activeKey" @change="onTabChange" animated>
+        <a-tab-pane key="post" tab="诗词">
+          <PostList :post-list="postList"/>
+        </a-tab-pane>
 
-      <a-tab-pane key="picture" tab="图片">
-        <PictureList :picture-list="pictureList"/>
-      </a-tab-pane>
+        <a-tab-pane key="article" tab="博文">
+          <ArticleList :article-list="articleList"/>
+        </a-tab-pane>
 
-      <!--      <a-tab-pane key="video" tab="视频">-->
-      <!--        <UserList :user-list="videoList"/>-->
-      <!--      </a-tab-pane>-->
-    </a-tabs>
+        <a-tab-pane key="picture" tab="图片">
+          <PictureList :picture-list="pictureList"/>
+        </a-tab-pane>
+
+        <!--      <a-tab-pane key="video" tab="视频">-->
+        <!--        <UserList :user-list="videoList"/>-->
+        <!--      </a-tab-pane>-->
+      </a-tabs>
+    </a-card>
+
   </div>
 </template>
 
@@ -45,11 +53,16 @@ import {message} from "ant-design-vue";
 import {ref} from 'vue';
 
 
-// 文章列表
+// 诗词列表
 const postList = ref([]);
+// 博文列表
 const articleList = ref([]);
+// 视频列表
 // const videoList = ref([]);
+// 图片列表
 const pictureList = ref([]);
+// 搜索建议词列表
+const suggestionList = ref([]);
 
 const router = useRouter();
 const route = useRoute();
@@ -130,9 +143,9 @@ interface Suggest {
 }
 
 // 请求获得建议词
-const getSuggest = (): Suggest => {
+const getSuggest = (sug: string): Suggest => {
   return {
-    value: "好好好",
+    value: sug,
   };
 };
 
@@ -152,12 +165,19 @@ const onSearchSuggest = (suggestText: string) => {
       suggestText: suggestText,
     }
   }).then((res: any) => {
-    console.log("res = " + res)
+    // console.log("res = " + res)
+
+    // 搜索建议词不为空
+    if (res) {
+      suggestionList.value = res
+      console.log("res = " + suggestionList.value)
+    }
   })
 
   options.value = !suggestText
       ? []
-      : [getSuggest(), getSuggest(), getSuggest()];
+      : [getSuggest(suggestionList.value[0]), getSuggest(suggestionList.value[1]),
+        getSuggest(suggestionList.value[2]), getSuggest(suggestionList.value[3]), getSuggest(suggestionList.value[4])];
 };
 
 // 执行搜索
@@ -197,8 +217,10 @@ const onTabChange = (key: any) => {
     path: key,
     query: searchParams.value,
   });
+
 };
 
+// 监听页面 URL 变化
 watchEffect(() => {
   searchParams.value = {
     ...initSearchParams,
@@ -208,3 +230,10 @@ watchEffect(() => {
   loadData(searchParams.value);
 });
 </script>
+
+<style>
+.hello {
+  padding-top: 30px;
+  background-color: #E1E0C7;
+}
+</style>
